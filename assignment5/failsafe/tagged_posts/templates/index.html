@@ -1,0 +1,34 @@
+[[extend 'layout.html']]
+
+<div class="columns">
+  <!-- Left column: post form + feed -->
+  <div class="column is-two-thirds">
+    <div class="box">
+      <textarea class="textarea post-content" placeholder="What's on your mind?"></textarea>
+      <button class="button is-primary submit-content mt-2">Post</button>
+    </div>
+
+    <div class="feed mt-4">
+      <!-- Default post to ensure at least one post_item exists -->
+      <!-- <div class="post_item box">#boring</div> -->
+    </div>
+  </div>
+
+  <style>
+    .tag.is-primary {
+      background-color: #00d1b2;
+      color: white;
+    }
+    </style>
+  <!-- Right column: tags -->
+  <div class="column is-one-third">
+    <div class="box">
+      <h3 class="title is-5">Tags</h3>
+      <div class="tags">
+        <!-- Tags will be dynamically populated here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/tagged_posts/static/js/index.js"></script>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>1040EZ Tax Form</title>
+  <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css" rel="stylesheet">
+  <style>
+    table {
+      margin: 20px auto;
+      width: 90%;
+    }
+  </style>
+</head>
+
+<body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">1040EZ Tax Form</h1>
+      <table class="table is-striped is-fullwidth">
+        <tbody>
+          <!-- Income -->
+          <tr class="row-1">
+            <td>Income</td>
+            <td><strong>1</strong> Wages, salaries, tips</td>
+            <td><input name="value-1" type="number" /></td>
+          </tr>
+          <tr class="row-2">
+            <td></td>
+            <td><strong>2</strong> Taxable interest</td>
+            <td><input name="value-2" type="number" /></td>
+          </tr>
+          <tr class="row-3">
+            <td></td>
+            <td><strong>3</strong> Unemployment compensation</td>
+            <td><input name="value-3" type="number" /></td>
+          </tr>
+          <tr class="row-4">
+            <td></td>
+            <td><strong>4</strong> Total income</td>
+            <td><input name="value-4" type="number" readonly /></td>
+          </tr>
+
+          <!-- Deductions -->
+          <tr class="row-5">
+            <td></td>
+            <td><strong>5</strong> Standard Deduction <input type="checkbox" id="filing-jointly" /></td>
+            <td><input name="value-5" type="number" value="13850" readonly /></td>
+          </tr>
+          <tr class="row-6">
+            <td></td>
+            <td><strong>6</strong> Taxable income</td>
+            <td><input name="value-6" type="number" readonly /></td>
+          </tr>
+
+          <!-- Payments, Credits, and Tax -->
+          <tr class="row-7">
+            <td>Payments, Credits, and Tax</td>
+            <td><strong>7</strong> Federal income tax withheld</td>
+            <td><input name="value-7" type="number" /></td>
+          </tr>
+          <tr class="row-8">
+            <td></td>
+            <td><strong>8</strong> Earned income credit</td>
+            <td><input name="value-8" type="number" /></td>
+          </tr>
+          <tr class="row-9">
+            <td></td>
+            <td><strong>9</strong> Total payments and credits</td>
+            <td><input name="value-9" type="number" readonly /></td>
+          </tr>
+          <tr class="row-10">
+            <td></td>
+            <td><strong>10</strong> Tax</td>
+            <td><input name="value-10" type="number" readonly /></td>
+          </tr>
+          <tr class="row-11">
+            <td></td>
+            <td><strong>11</strong> Health care: individual responsibility</td>
+            <td><input name="value-11" type="number" /></td>
+          </tr>
+          <tr class="row-12">
+            <td></td>
+            <td><strong>12</strong> Total tax</td>
+            <td><input name="value-12" type="number" readonly /></td>
+          </tr>
+
+          <!-- Refund -->
+          <tr class="row-13">
+            <td>Refund</td>
+            <td><strong>13</strong> If line 9 is more than line 12, subtract line 12 from line 9</td>
+            <td><input name="value-13" type="number" readonly /></td>
+          </tr>
+
+          <!-- Amount You Owe -->
+          <tr class="row-14">
+            <td>Amount You Owe</td>
+            <td><strong>14</strong> If line 12 is more than line 9, subtract line 9 from line 12</td>
+            <td><input name="value-14" type="number" readonly /></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <script>
+    function get(n) {
+      return parseFloat(document.querySelector(`[name=value-${n}]`).value) || 0;
+    }
+    function set(n, val) {
+      document.querySelector(`[name=value-${n}]`).value = val;
+    }
+
+    function computeTax(income) {
+      if (income <= 0) return 0;
+      const brackets = [
+        [0, 11000, 0.10],
+        [11000, 44725, 0.12],
+        [44725, 95375, 0.22],
+        [95375, 182100, 0.24],
+        [182100, 231250, 0.32],
+        [231250, 578125, 0.35],
+        [578125, Infinity, 0.37],
+      ];
+      let tax = 0;
+      for (let [min, max, rate] of brackets) {
+        if (income > min) {
+          tax += (Math.min(income, max) - min) * rate;
+        } else {
+          break;
+        }
+      }
+      return Math.round(tax * 10) / 10;
+    }
+
+    function calculate() {
+      const filingJointly = document.getElementById("filing-jointly").checked;
+      const deduction = filingJointly ? 27700 : 13850;
+      set(5, deduction);
+
+      set(4, get(1) + get(2) + get(3));
+      set(6, Math.max(0, get(4) - get(5)));
+      set(9, get(7) + get(8));
+      set(10, computeTax(get(6)));
+      set(12, get(10) + get(11));
+
+      const refund = Math.max(0, get(9) - get(12));
+      const owe = Math.max(0, get(12) - get(9));
+      set(13, refund);
+      set(14, owe);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      calculate();
+      document.querySelectorAll("input").forEach(input => {
+        input.addEventListener("input", calculate);
+        if (input.type === "checkbox") {
+          input.addEventListener("change", calculate);
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
